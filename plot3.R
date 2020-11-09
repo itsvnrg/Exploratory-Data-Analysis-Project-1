@@ -1,0 +1,30 @@
+# Download, extract and import data
+if(!file.exists("./data")){dir.create("./data")}
+
+fileUrl <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2Fhousehold_power_consumption.zip"
+download.file(fileUrl,destfile="./data/Dataset.zip")
+
+unzip(zipfile="./data/Dataset.zip",exdir="./data")
+
+full_data <- read.table("./data/household_power_consumption.txt", header = T, sep = ";", na.strings = "?")
+full_data$Date <- as.Date(full_data$Date, format="%d/%m/%Y")
+
+# Tidy data
+data <- subset(full_data, subset = (Date >= "2007-02-01" & Date <= "2007-02-02"))
+datetime <- paste(as.Date(data$Date), data$Time)
+data$Datetime <- as.POSIXct(datetime)
+
+
+# Plotting
+png("plot3.png", width=480, height=480)
+
+with(data, {
+  plot(Sub_metering_1~Datetime, type="l",
+       ylab="Global Active Power (kilowatts)", xlab="")
+  lines(Sub_metering_2~Datetime,col='Red')
+  lines(Sub_metering_3~Datetime,col='Blue')
+})
+legend("topright", col=c("black", "red", "blue"), lty=1, lwd=2, 
+       legend=c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"))
+
+dev.off()
